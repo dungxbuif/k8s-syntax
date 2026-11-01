@@ -23,3 +23,20 @@ curl -k --resolve k8s-syntax.dungxbuif.com:443:10.10.0.5 -I https://k8s-syntax.d
 
 The app is static and stores attempts only in browser LocalStorage under
 `k8s-syntax-v1`.
+
+## GitLab delivery
+
+GitLab CI runs `npm test` on branches and merge requests. A `dev-*`,
+`staging-*`, or `prod-*` tag must point to a commit reachable from the
+protected `main` branch before CI publishes an immutable image to the GitLab
+Container Registry. Only a protected, manual `prod-*` job updates the existing
+Swarm service, and the job verifies `/healthz` afterwards. Runtime variables
+are project-scoped masked/protected variables:
+
+- `K8S_SYNTAX_SWARM_MANAGER_HOST`
+- `K8S_SYNTAX_SWARM_MANAGER_USER`
+- `K8S_SYNTAX_SWARM_SSH_PRIVATE_KEY`
+- `K8S_SYNTAX_SWARM_KNOWN_HOSTS`
+
+Do not tag a feature branch for production and do not deploy a mutable image
+tag; the pipeline uses the registry digest returned by the build job.
